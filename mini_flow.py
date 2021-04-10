@@ -9,22 +9,36 @@ def sigmoid(x):
 
 class neuron:
     def __init__(self,size,output_size):
-        self.b=[np.random.rand(1,x) for x in size]
+        self.b=[np.random.rand(1,x) for x in output_size]
         self.w=[[np.random.rand(1,x) for x in size] for y in output_size]
     def forward(self,x):
         self.output=[]
         self.input=x
-        for i in self.w:
-            self.output.append(sigmoid(np.dot(i,x)+self.b))
+        for i in range(len(self.w)):
+            self.output.append(sigmoid(np.dot(self.w[i],x)+self.b[i]))
         return self.output
     def differentiate(self):
         self.dw=[]
-        for i in range(self.output):
+        self.db=[]
+        self.dx=[0 for i in self.input]
+        for i in self.output:
+            self.db.append(i*(1-i))
+        for i in self.db:
             tmp=[]
-            for j in range(self.input):
-                tmp.append(j*i*(1-i))
+            for j in self.input:
+                tmp.append(j*i)
             self.dw.append(tmp)
-        
+        for i in self.w:
+            for j in range(len(i)):
+                self.dx[j]+=i[j]*self.db[j]
+    def prev_diffs(self,dx):
+        tmp=0
+        for i in range(len(dx)):
+            self.db[i]*=dx[i]
+            self.dw[i]=[k*dx[i] for k in self.dw[i]]
+            tmp+=dx[i]
+        self.dx=[j*tmp for j in self.dx]
+
 
 class mini_nn:
     def __init__(self, nn_size):
